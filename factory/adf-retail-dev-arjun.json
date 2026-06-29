@@ -1,0 +1,15 @@
+{
+	"name": "adf-retail-dev-arjun",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "bd68cceb-7ba0-4fbe-bcd3-52946b5a4a16",
+		"tenantId": "5ee6f0d2-8ae5-498e-93d4-9c1d943a2c47"
+	}
+}
