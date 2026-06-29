@@ -1,0 +1,23 @@
+{
+	"name": "PL_Load_Table",
+	"properties": {
+		"parameters": {
+			"TableName": {
+				"type": "string"
+			},
+			"SourceSchema": {
+				"type": "string"
+			},
+			"SourceTable": {
+				"type": "string"
+			},
+			"SinkFolder": {
+				"type": "string"
+			},
+			"LoadType": {
+				"type": "string"
+			}
+		},
+		"annotations": []
+	}
+}
