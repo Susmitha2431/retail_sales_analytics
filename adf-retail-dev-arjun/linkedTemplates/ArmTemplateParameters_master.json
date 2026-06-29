@@ -14,6 +14,9 @@
 		"LS_ADLS_properties_typeProperties_url": {
 			"value": "https://stretaildev001arjun.dfs.core.windows.net/"
 		},
+		"LS_KeyVault_properties_typeProperties_baseUrl": {
+			"value": "https://kv-retail-dev-arjun.vault.azure.net/"
+		},
 		"LS_SQLDB_properties_typeProperties_server": {
 			"value": "sql-retail-dev.database.windows.net"
 		},
@@ -22,9 +25,6 @@
 		},
 		"LS_SQLDB_properties_typeProperties_userName": {
 			"value": "arjun8176"
-		},
-		"LS_KeyVault_properties_typeProperties_baseUrl": {
-			"value": "https://kv-retail-dev-arjun.vault.azure.net/"
 		},
 		"containerUri": {
 			"value": ""
