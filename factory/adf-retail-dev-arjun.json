@@ -5,6 +5,10 @@
 			"Environment": {
 				"type": "string",
 				"value": "Dev"
+			},
+			"Container": {
+				"type": "string",
+				"value": "retail"
 			}
 		},
 		"trustModeClaimForMi": {
