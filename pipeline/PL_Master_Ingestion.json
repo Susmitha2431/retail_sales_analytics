@@ -15,6 +15,16 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT\n    TableName,\n    SourceSchema,\n    SourceTable,\n    SinkFolder,\n    LoadType\nFROM control.PipelineConfig\nWHERE IsActive = 1\nORDER BY TableName;",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SQL_CONTROL",
+						"type": "DatasetReference"
+					},
 					"firstRowOnly": false
 				}
 			}
