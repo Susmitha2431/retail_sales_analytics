@@ -1,1 +1,14 @@
-{}
+{
+	"Environment": {
+		"type": "string",
+		"value": "Dev"
+	},
+	"Container": {
+		"type": "string",
+		"value": "retail"
+	},
+	"RawFolder": {
+		"type": "string",
+		"value": "raw"
+	}
+}
