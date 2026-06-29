@@ -1,6 +1,12 @@
 {
 	"name": "adf-retail-dev-arjun",
 	"properties": {
+		"globalParameters": {
+			"Environment": {
+				"type": "string",
+				"value": "Dev"
+			}
+		},
 		"trustModeClaimForMi": {
 			"value": "Disabled",
 			"editable": true
