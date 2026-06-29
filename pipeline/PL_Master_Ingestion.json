@@ -56,7 +56,33 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"waitOnCompletion": true
+								"pipeline": {
+									"referenceName": "PL_Load_Table",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"TableName": {
+										"value": "@item().TableName",
+										"type": "Expression"
+									},
+									"SourceSchema": {
+										"value": "@item().SourceSchema",
+										"type": "Expression"
+									},
+									"SourceTable": {
+										"value": "@item().SourceTable",
+										"type": "Expression"
+									},
+									"SinkFolder": {
+										"value": "@item().SinkFolder",
+										"type": "Expression"
+									},
+									"LoadType": {
+										"value": "@item().LoadType",
+										"type": "Expression"
+									}
+								}
 							}
 						}
 					]
