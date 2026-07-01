@@ -57,13 +57,39 @@
 			{
 				"name": "IF_FullOrIncremental",
 				"type": "IfCondition",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "SET_Watermark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
 						"value": "@equals(pipeline().parameters.LoadType,'Full')",
 						"type": "Expression"
 					},
+					"ifFalseActivities": [
+						{
+							"name": "Set Query",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "DynamicQuery",
+								"value": {
+									"value": "@concat(\r\n'SELECT * FROM ',\r\npipeline().parameters.SourceSchema,\r\n'.',\r\npipeline().parameters.SourceTable,\r\n' WHERE LastModifiedDate > ''',\r\nvariables('WatermarkValue'),\r\n''''\r\n)",
+									"type": "Expression"
+								}
+							}
+						}
+					],
 					"ifTrueActivities": [
 						{
 							"name": "set query",
