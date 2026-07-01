@@ -73,7 +73,7 @@
 					},
 					"ifFalseActivities": [
 						{
-							"name": "Set Query",
+							"name": "Set Query incremental",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"policy": {
@@ -92,7 +92,7 @@
 					],
 					"ifTrueActivities": [
 						{
-							"name": "set query",
+							"name": "set query full",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"policy": {
