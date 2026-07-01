@@ -102,7 +102,10 @@
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "DynamicQuery",
-								"value": "@concat(\n'SELECT * FROM ',\npipeline().parameters.SourceSchema,\n'.',\npipeline().parameters.SourceTable\n)"
+								"value": {
+									"value": "@concat(\n'SELECT * FROM ',\npipeline().parameters.SourceSchema,\n'.',\npipeline().parameters.SourceTable\n)",
+									"type": "Expression"
+								}
 							}
 						}
 					]
@@ -130,29 +133,15 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "@variables('Query')",
+						"sqlReaderQuery": {
+							"value": "@variables('Query')",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
-					"sink": {
-						"type": "ParquetSink",
-						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings"
-						},
-						"formatSettings": {
-							"type": "ParquetWriteSettings"
-						}
-					},
 					"enableStaging": false,
-					"enableSkipIncompatibleRow": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
+					"enableSkipIncompatibleRow": false
 				},
 				"inputs": [
 					{
@@ -164,19 +153,6 @@
 								"value": "@pipeline().parameters.SourceTable",
 								"type": "Expression"
 							}
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "DS_ADLS_DYNAMIC",
-						"type": "DatasetReference",
-						"parameters": {
-							"FolderName": {
-								"value": "@pipeline().parameters.SinkFolder",
-								"type": "Expression"
-							},
-							"FileName": "@concat(pipeline().parameters.TableName,'_',formatDateTime(utcNow(),'yyyyMMddHHmmss'),'.parquet')"
 						}
 					}
 				]
