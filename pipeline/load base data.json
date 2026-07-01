@@ -62,7 +62,13 @@
 							"inputs": [
 								{
 									"referenceName": "ds_csv_files",
-									"type": "DatasetReference"
+									"type": "DatasetReference",
+									"parameters": {
+										"FileName": {
+											"value": "@item().itemName",
+											"type": "Expression"
+										}
+									}
 								}
 							],
 							"outputs": [
