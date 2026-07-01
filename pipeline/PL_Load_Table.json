@@ -140,8 +140,25 @@
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
 					"enableStaging": false,
-					"enableSkipIncompatibleRow": false
+					"enableSkipIncompatibleRow": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
 				},
 				"inputs": [
 					{
@@ -151,6 +168,22 @@
 							"SchemaName": "@pipeline().parameters.SourceSchema",
 							"TableName": {
 								"value": "@pipeline().parameters.SourceTable",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ADLS_DYNAMIC",
+						"type": "DatasetReference",
+						"parameters": {
+							"FolderName": {
+								"value": "@pipeline().parameters.SinkFolder",
+								"type": "Expression"
+							},
+							"FileName": {
+								"value": "@concat(pipeline().parameters.TableName,'_',formatDateTime(utcNow(),'yyyyMMddHHmmss'),'.parquet')",
 								"type": "Expression"
 							}
 						}
