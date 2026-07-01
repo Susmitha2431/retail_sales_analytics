@@ -17,13 +17,40 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "@concat(\r\n'SELECT WatermarkValue\r\nFROM control.Watermark\r\nWHERE TableName = ''',\r\npipeline().parameters.TableName,\r\n''''\r\n)",
+						"sqlReaderQuery": {
+							"value": "@concat(\r\n'SELECT WatermarkValue\r\nFROM control.Watermark\r\nWHERE TableName = ''',\r\npipeline().parameters.TableName,\r\n''''\r\n)",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
 					"dataset": {
 						"referenceName": "DS_SQL_CONTROL",
 						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "SET_Watermark",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LKP_GetWatermark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "WatermarkValue",
+					"value": {
+						"value": "@activity('LKP_GetWatermark').output.firstRow.LastWatermark",
+						"type": "Expression"
 					}
 				}
 			}
@@ -52,7 +79,7 @@
 			"DynamicQuery": {
 				"type": "String"
 			},
-			"RowsCopied": {
+			"OutputFileName": {
 				"type": "Integer"
 			}
 		},
