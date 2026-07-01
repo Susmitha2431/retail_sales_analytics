@@ -110,6 +110,46 @@
 					}
 				},
 				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().FolderName",
+							"type": "Expression"
+						},
+						"fileSystem": "retail"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_DYNAMIC_CSV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderName": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
@@ -242,6 +282,241 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_Load_Table')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LKP_GetWatermark",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "@concat(\r\n'SELECT WatermarkValue\r\nFROM control.Watermark\r\nWHERE TableName = ''',\r\npipeline().parameters.TableName,\r\n''''\r\n)",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_SQL_CONTROL",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "SET_Watermark",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "LKP_GetWatermark",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "WatermarkValue",
+							"value": {
+								"value": "@activity('LKP_GetWatermark').output.firstRow.LastWatermark",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "IF_FullOrIncremental",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "SET_Watermark",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.LoadType,'Full')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Set Query",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "DynamicQuery",
+										"value": {
+											"value": "@concat(\r\n'SELECT * FROM ',\r\npipeline().parameters.SourceSchema,\r\n'.',\r\npipeline().parameters.SourceTable,\r\n' WHERE LastModifiedDate > ''',\r\nvariables('WatermarkValue'),\r\n''''\r\n)",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "set query",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "DynamicQuery",
+										"value": {
+											"value": "@concat(\n'SELECT * FROM ',\npipeline().parameters.SourceSchema,\n'.',\npipeline().parameters.SourceTable\n)",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "CPY_SQL_To_ADLS",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "IF_FullOrIncremental",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "@variables('DynamicQuery')",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_SQL_DYNAMIC",
+								"type": "DatasetReference",
+								"parameters": {
+									"SchemaName": "@pipeline().parameters.SourceSchema",
+									"TableName": {
+										"value": "@pipeline().parameters.SourceTable",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_ADLS_DYNAMIC",
+								"type": "DatasetReference",
+								"parameters": {
+									"FolderName": {
+										"value": "@pipeline().parameters.SinkFolder",
+										"type": "Expression"
+									},
+									"FileName": {
+										"value": "@concat(pipeline().parameters.TableName,'_',formatDateTime(utcNow(),'yyyyMMddHHmmss'),'.parquet')",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"TableName": {
+						"type": "string"
+					},
+					"SourceSchema": {
+						"type": "string"
+					},
+					"SourceTable": {
+						"type": "string"
+					},
+					"SinkFolder": {
+						"type": "string"
+					},
+					"LoadType": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"WatermarkValue": {
+						"type": "String"
+					},
+					"DynamicQuery": {
+						"type": "String"
+					},
+					"OutputFileName": {
+						"type": "Integer"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_SQL_CONTROL')]",
+				"[concat(variables('factoryId'), '/datasets/DS_SQL_DYNAMIC')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_DYNAMIC')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_Master_Ingestion')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -275,11 +550,65 @@
 						}
 					},
 					{
-						"name": "ForEach1",
+						"name": "FE_LoadTables",
 						"type": "ForEach",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "LKP_GetPipelineConfig",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"userProperties": [],
-						"typeProperties": {}
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LKP_GetPipelineConfig').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 3,
+							"activities": [
+								{
+									"name": "EXE_LoadTable",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_Load_Table",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"TableName": {
+												"value": "@item().TableName",
+												"type": "Expression"
+											},
+											"SourceSchema": {
+												"value": "@item().SourceSchema",
+												"type": "Expression"
+											},
+											"SourceTable": {
+												"value": "@item().SourceTable",
+												"type": "Expression"
+											},
+											"SinkFolder": {
+												"value": "@item().SinkFolder",
+												"type": "Expression"
+											},
+											"LoadType": {
+												"value": "@item().LoadType",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
 					}
 				],
 				"policy": {
@@ -288,7 +617,8 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_SQL_CONTROL')]"
+				"[concat(variables('factoryId'), '/datasets/DS_SQL_CONTROL')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_Load_Table')]"
 			]
 		}
 	]
