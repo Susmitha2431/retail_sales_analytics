@@ -113,7 +113,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"expression": {
-								"value": "@equals(pipeline().parameters.LoadType,'Full')",
+								"value": "@equals(pipeline().parameters.LoadType,'FULL')",
 								"type": "Expression"
 							},
 							"ifFalseActivities": [
