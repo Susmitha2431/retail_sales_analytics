@@ -23,7 +23,7 @@
 					"type": "Expression"
 				},
 				"folderPath": {
-					"value": "@dataset().FolderName",
+					"value": "@concat(globalParameters.RawFolder,'/',dataset().FolderName)",
 					"type": "Expression"
 				},
 				"fileSystem": "retail"
