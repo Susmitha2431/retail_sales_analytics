@@ -21,7 +21,7 @@
 					},
 					"activities": [
 						{
-							"name": "Copy data from local csv_copy1",
+							"name": "Copy data from local",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
