@@ -53,6 +53,34 @@
 						"type": "Expression"
 					}
 				}
+			},
+			{
+				"name": "IF_FullOrIncremental",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.LoadType,'Full')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "set query",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "DynamicQuery",
+								"value": "@concat(\n'SELECT * FROM ',\npipeline().parameters.SourceSchema,\n'.',\npipeline().parameters.SourceTable\n)"
+							}
+						}
+					]
+				}
 			}
 		],
 		"parameters": {
