@@ -49,7 +49,7 @@
 				"typeProperties": {
 					"variableName": "WatermarkValue",
 					"value": {
-						"value": "@activity('LKP_GetWatermark').output.firstRow.LastWatermark",
+						"value": "@activity('LKP_GetWatermark').output.firstRow.WatermarkValue",
 						"type": "Expression"
 					}
 				}
