@@ -19,6 +19,7 @@
 						"value": "@activity('Get Metadata1').output.childItems",
 						"type": "Expression"
 					},
+					"isSequential": true,
 					"activities": [
 						{
 							"name": "Copy data from local",
@@ -52,72 +53,6 @@
 								"enableStaging": false,
 								"translator": {
 									"type": "TabularTranslator",
-									"mappings": [
-										{
-											"source": {
-												"name": "OrderID",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "OrderID",
-												"type": "Int32",
-												"physicalType": "int"
-											}
-										},
-										{
-											"source": {
-												"name": "CustomerID",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "CustomerID",
-												"type": "Int32",
-												"physicalType": "int"
-											}
-										},
-										{
-											"source": {
-												"name": "OrderDate",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "OrderDate",
-												"type": "DateTime",
-												"physicalType": "datetime"
-											}
-										},
-										{
-											"sink": {
-												"name": "OrderStatus",
-												"type": "String",
-												"physicalType": "varchar"
-											}
-										},
-										{
-											"sink": {
-												"name": "TotalAmount",
-												"type": "Decimal",
-												"physicalType": "decimal",
-												"scale": 2,
-												"precision": 10
-											}
-										},
-										{
-											"source": {
-												"name": "LastModifiedDate",
-												"type": "String",
-												"physicalType": "String"
-											},
-											"sink": {
-												"name": "LastModifiedDate",
-												"type": "DateTime",
-												"physicalType": "datetime"
-											}
-										}
-									],
 									"typeConversion": true,
 									"typeConversionSettings": {
 										"allowDataTruncation": true,
