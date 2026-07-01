@@ -134,7 +134,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "@variables('Query')",
+							"value": "@variables('DynamicQuery')",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
