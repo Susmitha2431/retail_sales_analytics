@@ -119,7 +119,7 @@
 							"type": "Expression"
 						},
 						"folderPath": {
-							"value": "@dataset().FolderName",
+							"value": "@concat('raw/',dataset().FolderName)",
 							"type": "Expression"
 						},
 						"fileSystem": "retail"
